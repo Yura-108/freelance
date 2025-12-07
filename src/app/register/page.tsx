@@ -1,7 +1,10 @@
 'use client'
 import Link from 'next/link'
+import {useRouter} from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = new FormData(e.currentTarget)
@@ -13,10 +16,10 @@ export default function RegisterPage() {
         password: form.get('password'),
       }),
       headers: { 'Content-Type': 'application/json' },
-    })
+    });
 
     if (res.ok) {
-      window.location.href = '/dashboard/clients'
+      router.push('/dashboard/clients');
     } else {
       alert('Ошибка регистрации')
     }

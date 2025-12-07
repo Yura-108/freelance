@@ -7,8 +7,8 @@ interface Comment { id: string; text: string; author: { name: string | null }; c
 interface Client { id: string; name: string; email: string | null; phone: string | null; comments: Comment[] }
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>([])
-  const [loading, setLoading] = useState(true)
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/clients', { credentials: 'include' })

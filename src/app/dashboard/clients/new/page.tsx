@@ -26,6 +26,7 @@ export default function NewClientPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(form),
+        credentials: "include"
       })
 
       if (!res.ok) {

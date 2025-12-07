@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import {useUserStore} from "@/store/user.store";
+import {useRouter} from "next/navigation";
 
 export default function LoginPage() {
-  const {setUser} = useUserStore();
+  const router = useRouter();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const form = new FormData(e.currentTarget)
@@ -17,12 +18,8 @@ export default function LoginPage() {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    const {user} = await res.json().catch(() => ({}));
-
-    setUser(user);
-
     if (res.ok) {
-      window.location.href = '/dashboard/clients'
+      router.push('/dashboard/clients');
     } else {
       alert('Неверный логин или пароль')
     }
