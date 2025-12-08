@@ -1,23 +1,6 @@
 import {NextRequest, NextResponse} from 'next/server'
 import prisma from '@/utils/prisma';
-import {cookies} from "next/headers";
-import jwt from "jsonwebtoken";
-
-async function getUserId(): Promise<string | null> {
-  const cookiesStore = await cookies();
-  const token = cookiesStore.get('token')?.value;
-
-  if (!token) {
-    return null;
-  }
-  try {
-    const decode = jwt.verify(token, process.env.JWT_SECRET!) as {userId: string};
-    return decode.userId;
-  } catch (error) {
-    console.error('Invalid or expired token:', error);
-    return null;
-  }
-}
+import {getUserId} from "@/utils/auth";
 
 export async function GET(_req: NextRequest) {
   const userId = await getUserId();
@@ -48,8 +31,6 @@ export async function POST(request: NextRequest) {
     );
   }
   const body = await request.json();
-
-  console.log("BODY:", body);
 
   const client = await prisma.client.create({
     data: {...body, ownerId: userId},

@@ -1,19 +1,21 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import Link from "next/link";
 
-export default function ClientPage({ params }: { params: { id: string } }) {
-  const [client, setClient] = useState<any>(null)
-  const [comment, setComment] = useState('')
+export default function ClientPage({ params }: { params: Promise<{ id: string }> }) {
+  const [client, setClient] = useState<any>(null);
+  const [comment, setComment] = useState('');
+  const {id} = React.use(params);
 
   useEffect(() => {
-    fetch(`/api/clients/${params.id}`, { credentials: 'include' })
+    fetch(`/api/clients/${id}`, { credentials: 'include' })
       .then(r => r.json())
       .then(setClient)
-  }, [params.id])
+  }, [id])
 
   const addComment = async () => {
-    await fetch(`/api/clients/${params.id}/comments`, {
+    await fetch(`/api/clients/${id}/comments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: comment }),
@@ -21,7 +23,7 @@ export default function ClientPage({ params }: { params: { id: string } }) {
     })
     setComment('')
     // обновляем клиента
-    fetch(`/api/clients/${params.id}`, { credentials: 'include' })
+    fetch(`/api/clients/${id}`, { credentials: 'include' })
       .then(r => r.json())
       .then(setClient)
   }
@@ -29,7 +31,7 @@ export default function ClientPage({ params }: { params: { id: string } }) {
   if (!client) return <div>Загрузка...</div>
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
+    <div className="text-black max-w-4xl mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">{client.name}</h1>
       <div className="grid md:grid-cols-2 gap-8">
         <div>
@@ -50,14 +52,25 @@ export default function ClientPage({ params }: { params: { id: string } }) {
           </button>
 
           <div className="mt-6 space-y-3">
-            {client.comments.map((c: any) => (
-              <div key={c.id} className="border-l-4 border-gray-300 pl-4">
-                <p className="text-sm text-gray-600">{c.author.name} — {new Date(c.createdAt).toLocaleString()}</p>
-                <p>{c.text}</p>
-              </div>
-            ))}
+            {client.comments && (
+              client.comments.map((c: any) => (
+                  <div key={c.id} className="border-l-4 border-gray-300 pl-4">
+                    <p className="text-sm text-gray-600">{c.author.name} — {new Date(c.createdAt).toLocaleString()}</p>
+                    <p>{c.text}</p>
+                  </div>
+                ))
+            )}
           </div>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <Link
+          href="/dashboard/clients"
+          className="inline-block bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+        >
+          ← Назад к списку клиентов
+        </Link>
       </div>
     </div>
   )

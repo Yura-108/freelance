@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 interface Comment { id: string; text: string; author: { name: string | null }; createdAt: string }
@@ -30,7 +30,7 @@ export default function ClientsPage() {
       {clients.length === 0 ? (
         <p className="text-center text-gray-500 py-12">У вас пока нет клиентов. Создайте первого!</p>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid text-black gap-6 md:grid-cols-2 lg:grid-cols-3">
           {clients.map(client => (
             <Link href={`/dashboard/clients/${client.id}`} key={client.id} className="block border rounded-lg p-6 hover:shadow-lg transition">
               <h3 className="text-xl font-semibold mb-2">{client.name}</h3>
