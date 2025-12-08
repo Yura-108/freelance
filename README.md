@@ -1,36 +1,200 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+# 🧾 CRM для фрилансера — серверное приложение  
+**Лабораторная работа: Авторизация (JWT), ORM, защита маршрутов, перенос CRUD в базу данных**
 
-First, run the development server:
+Этот проект представляет собой серверную CRM-систему для фрилансера, включающую управление клиентами, их счетами и комментариями.  
+Приложение реализовано на **Node.js (Express)** с использованием **Prisma ORM** и базой данных **SQLite**/**PostgreSQL**.  
+Реализованы регистрация, логин, выдача JWT, защищённые маршруты, связь сущностей через `ownerId` и полный CRUD на базе данных.
+
+## 📌 Функциональность
+
+### ✔ Авторизация и безопасность
+- Регистрация пользователей (`/api/auth/signup`)
+- Логин (`/api/auth/login`)
+- Выдача **JWT access token**
+- **Middleware защиты маршрутов** (Bearer token)
+- Доступ к данным только своего пользователя (ownerId)
+- Хеширование паролей через **bcrypt**
+- CORS,dotenv, ограничения размера тела запроса
+- Структура секретов в `.env`
+
+### ✔ ORM и база данных
+Используется **Prisma ORM**, настроены:
+- Миграции
+- Схема данных
+- Связи User → Clients → Invoices → Comments
+- Seed-скрипт (минимальные тестовые данные)
+
+### ✔ CRUD-операции
+Реализованы CRUD-маршруты для:
+- Клиентов (`/api/clients`)
+- Счетов (`/api/invoices`)
+- Комментариев (`/api/comments`)
+
+Все CRUD-операции работают **только в контексте авторизованного пользователя**.
+
+# 🗄 Структура сущностей (Prisma schema)
+
+### 👤 User
+- `id`
+- `email`
+- `passwordHash`
+- `createdAt`
+- `updatedAt`
+- `clients` — связь 1:N
+
+### 🧑‍💼 Client
+- `id`
+- `name`
+- `contact`
+- `ownerId` → User
+- `invoices` — связь 1:N
+- `comments` — связь 1:N
+
+### 💸 Invoice (счёт)
+- `id`
+- `amount`
+- `status`
+- `clientId`
+
+### 💬 Comment
+- `id`
+- `text`
+- `clientId`
+
+# 🔧 Установка и запуск
+
+```bash
+git clone https://github.com/Yura-108/freelance
+cd freelance
+npm install
+```
+
+Создайте `.env` из примера:
+
+```
+DATABASE_URL="file:./dev.db"
+JWT_SECRET="your-secret"
+PORT=3000
+```
+
+Выполните миграции:
+
+```bash
+npx prisma migrate dev
+```
+
+(по желанию) Запустить seed:
+
+```bash
+npm run seed
+```
+
+Запуск сервера:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# 🔑 Аутентификация
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Регистрация  
+`POST /api/auth/signup`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Body:
+```json
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+```
 
-## Learn More
+## Логин  
+`POST /api/auth/login`
 
-To learn more about Next.js, take a look at the following resources:
+Body:
+```json
+{
+  "email": "test@example.com",
+  "password": "123456"
+}
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Ответ:
+```json
+{
+  "token": "JWT_TOKEN_HERE"
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Токен нужно передавать в запросах:
 
-## Deploy on Vercel
+```
+Authorization: Bearer JWT_TOKEN_HERE
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# 📍 CRUD Эндпоинты
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Clients  
+| Метод | Маршрут | Описание |
+|-------|---------|----------|
+| GET | `/api/clients` | Получить всех клиентов текущего пользователя |
+| POST | `/api/clients` | Создать клиента |
+| GET | `/api/clients/:id` | Получить клиента |
+| PUT | `/api/clients/:id` | Обновить |
+| DELETE | `/api/clients/:id` | Удалить |
+
+## Invoices  
+| Метод | Маршрут |
+|-------|---------|
+| GET | `/api/invoices` |
+| POST | `/api/invoices` |
+| PUT | `/api/invoices/:id` |
+| DELETE | `/api/invoices/:id` |
+
+## Comments  
+| Метод | Маршрут |
+|-------|---------|
+| GET | `/api/comments` |
+| POST | `/api/comments` |
+| DELETE | `/api/comments/:id` |
+
+# 🛡 Безопасность
+
+- Пароли НЕ хранятся в открытом виде  
+- JWT токен содержит только `userId`
+- Все защищённые маршруты проверяют токен
+- Пользователь видит только свои записи (clients/invoices/comments)
+- Применён CORS и ограничение тела запроса
+
+# 📁 Скрипты
+
+| Команда | Назначение |
+|---------|------------|
+| `npm run dev` | запуск сервера |
+| `npm run prisma` | prisma studio |
+| `npm run seed` | создание тестовых данных |
+| `npx prisma migrate dev` | миграции |
+
+# 📝 Критерии и выполнение
+
+| Критерий | Статус |
+|----------|--------|
+| Схема БД, миграции | ✔ выполнено |
+| CRUD + связь с пользователем | ✔ выполнено |
+| Безопасность, JWT, CORS | ✔ выполнено |
+| Архитектура, структура кода | ✔ выполнено |
+| Документация (README) | ✔ выполнено |
+| Тесты | ❌ отсутствуют |
+
+# ✨ Бонусы
+
+Потенциальные улучшения:
+- Refresh-токен + обновление токена  
+- Роли (admin / user)  
+- Password reset через email-заглушку  
+
+# 📬 Контакты
+
+Автор: **Yura-108**  
+GitHub: https://github.com/Yura-108
