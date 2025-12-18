@@ -26,20 +26,25 @@ export default function NewClientPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(form),
-        credentials: "include"
-      })
+        credentials: "include",
+      });
 
       if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || "Failed to create client")
+        const data = await res.json();
+        setError(data.error || "Failed to create client");
+        return
       }
 
       // после успешного создания — редирект на список клиентов
-      router.push("/dashboard/clients")
-    } catch (err: any) {
-      setError(err.message)
+      router.push("/dashboard/clients");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unexpected error occurred");
+      }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 

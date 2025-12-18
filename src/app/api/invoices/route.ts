@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from "next/server";
 import {getUserId} from "@/utils/auth";
 import prisma from "@/utils/prisma";
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   const userId = await getUserId();
 
   if (!userId) {

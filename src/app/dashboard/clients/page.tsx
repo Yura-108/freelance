@@ -2,9 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import {Client} from "@/types/types";
 
-interface Comment { id: string; text: string; author: { name: string | null }; createdAt: string }
-interface Client { id: string; name: string; email: string | null; phone: string | null; comments: Comment[] }
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -14,7 +13,7 @@ export default function ClientsPage() {
     fetch('/api/clients', { credentials: 'include' })
       .then(r => r.json())
       .then(data => { setClients(data); setLoading(false) })
-  }, [])
+  }, []);
 
   if (loading) return <div className="p-8 text-center">Загрузка...</div>
 

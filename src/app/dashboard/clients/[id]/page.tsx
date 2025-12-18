@@ -2,9 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from "next/link";
+import {Client, Comment} from "@/types/types";
 
 export default function ClientPage({ params }: { params: Promise<{ id: string }> }) {
-  const [client, setClient] = useState<any>(null);
+  const [client, setClient] = useState<Client | null>(null);
   const [comment, setComment] = useState('');
   const {id} = React.use(params);
 
@@ -53,7 +54,7 @@ export default function ClientPage({ params }: { params: Promise<{ id: string }>
 
           <div className="mt-6 space-y-3">
             {client.comments && (
-              client.comments.map((c: any) => (
+              client.comments.map((c: Comment) => (
                   <div key={c.id} className="border-l-4 border-gray-300 pl-4">
                     <p className="text-sm text-gray-600">{c.author.name} — {new Date(c.createdAt).toLocaleString()}</p>
                     <p>{c.text}</p>

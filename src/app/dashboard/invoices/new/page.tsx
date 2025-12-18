@@ -34,12 +34,15 @@ export default function NewInvoicePage() {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || "Не удалось создать счёт")
+        setError(data.error || "Failed to create invoice");
+        return;
       }
 
       router.push("/dashboard/invoices")
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
     } finally {
       setLoading(false)
     }
